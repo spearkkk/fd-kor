@@ -46,7 +46,7 @@
       Range (min … max):    3.876 s …  3.964 s
 ```
 
-이제 `fd`를 이용해서 같은 작업을 해본다. 주의할 점은 `fd` 는 항상 정규식으로 검색한다. 옵션으로 넣은 `--hidden`과 `--no-ignore`은 위와 동일한 비교를 위해 필요했다. 왜냐하면 `fd`는 숨김 폴더들과 ignored로 경로들을 기본적으로 검색하지 않기 때문이다(아래를 참고):
+이제 `fd`를 이용해서 같은 작업을 해본다. 주의할 점은 `fd` 는 항상 정규식으로 검색한다. 옵션으로 넣은 `--hidden`과 `--no-ignore`은 위와 동일한 비교를 위해 필요했다. 왜냐하면 `fd`는 숨김 폴더들과 ignored 된 경로들을 기본적으로 검색하지 않기 때문이다(아래를 참고):
 ```
     Benchmark #3: fd -HI '.*[0-9]\\.jpg$' ~
     
@@ -55,7 +55,7 @@
       Range (min … max):   786.0 ms … 870.7 ms
 ```
 
-위의 상황에서, `fd`가 대략적으로 `find -iregex`보다 9배, `find -iname`보다 5배나 더 빠른 성능을 보여주고 있다. 성능 차이가 나는 반면에 두개의 결과 모든 같은 결과를 보여주었다 :smaile:.
+위의 상황에서, `fd`가 대략적으로 `find -iregex`보다 9배, `find -iname`보다 5배나 더 빠른 성능을 보여주고 있다. 성능 차이가 나는 반면에 두개의 결과 모든 같은 결과를 보여주었다 :smile:.
 
 끝으로, `--hidden`과 `--no-ignore` 옵션 없이 실행 해보자(물론 이 검색 결과는 위와 다르다). *fd*로 숨겨진 폴더 또는 git-ignored로 무시되는 것을 찾을 필요가 없다면, 훨씬 더 빠르다:
 ```
@@ -77,13 +77,9 @@ in [ripgrep](https://github.com/BurntSushi/ripgrep) (check it out!).
 `fd`는 [`NO_COLOR`](https://no-color.org/) 환경 변수도 존중한다.
 
 ## 병렬 Command 실행
-If the `-x`/`--exec` option is specified alongside a command template, a job pool will be created
-for executing commands in parallel for each discovered path as the input. The syntax for generating commands is similar to that of GNU Parallel:
-
 Command에 `-x`/ `--exec`라는 옵션이 있다면, 병렬로 command를 수행하기 위한 job pool이 생성될 것이다. 문법은 GNU 병렬 처리와 유사하다:
 
 - `{}`: 검색 결과의 경로로 대체되는 플레이스 홀더(`documents/images/party.jpg`).
-- `{.}`: Like `{}`, but without the file extension .
 - `{.}`: `{}`와 비슷하나 파일의 확장자가 없는 플레이스 홀더(`documents/images/party`).
 - `{/}`: 검색 결과의 basename로 대체되는 플레이스 홀더(`party.jpg`).
 - `{//}`: 찾은 경로의 상위(부모) 경로를 이용하는 플레이스 홀더(`documents/images`).
@@ -102,8 +98,6 @@ fd -e flac -x ffmpeg -i {} -c:a libopus {.}.opus
 # Count the number of lines in Rust files (the command template can be terminated with ';'):
 fd -x wc -l \; -e rs
 ```
-
-The number of threads used for command execution can be set with the `--threads`/`-j` option.
 
 Command를 실행하기 위한 쓰레드(thread)의 수는 `--threads`/ `-j`옵션으로 설정할 수 있다.
 
@@ -308,16 +302,16 @@ also includes a much more detailed help text.
 
 ### 간단하게 검색하기
 
-*fd*는 파일시스템(filesystem)의 모든 것을 찾기 위해 만들어졌다. 가장 기본적인 검색 방법은 검색 패턴(search pattern)을 이용하여 *fd*를 실행하는 것이다. 예를 들어, `netflix`라는 이름이 포함된 오래된 script를 찾기를 원한다고 가정하자:
+*fd*는 파일시스템(filesystem)의 모든 것을 찾기 위해 만들어졌다. 가장 기본적인 검색 방법은 검색 패턴(search pattern)을 이용하여 *fd*를 실행하는 것이다. 예를 들어, `netflix`라는 이름이 포함된 오래된 script를 찾는다고 하자:
 ``` bash
 > fd netfl
 Software/python/imdb-ratings/netflix-details.py
 ```
-위와 같이 검색 패턴(search pattern)을 주어 command를 실행하면, *fd*는 현재 폴더부터 재귀적으로 `netfl`라는 패턴이 포함된 모든 것들을 검색한다.
+위와 같이 검색 패턴을 주어 command를 실행하면, *fd*는 현재 폴더부터 재귀적으로 `netfl`라는 패턴이 포함된 모든 것들을 검색한다.
 
 ### 정규 표현식으로 검색하기
 
-검색 패턴(search pattern)은 정규 표현식으로 처리한다. 여기서 우리는 `x`로 시작하고 `rc`로 끝나는 모든 것을 검색해보자:
+검색 패턴은 정규 표현식으로 처리한다. 여기서 우리는 `x`로 시작하고 `rc`로 끝나는 모든 것을 검색해보자:
 ``` bash
 > cd /etc
 > fd '^x.*rc$'
@@ -326,9 +320,6 @@ X11/xinit/xserverrc
 ```
 
 ### 상위 폴더 지정해서 검색하기
-
-If we want to search a specific directory, it can be given as a second argument to *fd*:
-
 특정 폴더에서 검색하고 싶다면, *fd*에 두 번째 매개변수(argument)로 넘겨줄 수 있다:
 ``` bash
 > fd passwd /etc
@@ -366,7 +357,7 @@ CONTRIBUTING.md
 README.md
 ``` 
 
-이 `-e`라는 옵션은 검색 패턴(search pattern)과 조합하여 사용할 수 있다:
+이 `-e`라는 옵션은 검색 패턴과 조합하여 사용할 수 있다:
 ``` bash
 > fd -e rs mod
 src/fshelper/mod.rs
@@ -409,9 +400,6 @@ target/debug/deps/libnum_cpus-f5ce7ef99006aa05.rlib
 ``` bash
 > fd -E '*.bak' …
 ```
-
-To make exclude-patterns like these permanent, you can create a `.fdignore` file. They work like
-`.gitignore` files, but are specific to `fd`. For example:
 
 이러한 제외 패턴들을 지속적으로 저장할 수 있는데, 이때 `.fdignore` 파일을 이용할 수 있다. 이 파일은 `.gitignore`파일과 비슷하게 동작하는데, `fd`에 한정되어 있다. 예를 들어:
 ``` bash
@@ -457,17 +445,10 @@ No such file or directory"* 라는 에러가 나타는 상황을 만나게 될 �
 
 ### `fd`에서 정규식 패턴이 정상적으로 동작하지 않는다면?!
 
-A lot of special regex characters (like `[]`, `^`, `$`, ..) are also special characters in your
-shell. If in doubt, always make sure to put single quotes around the regex pattern:
-
 많은 특수 문자(`[]`, `^`, `$`, ... 처럼)는 쉘(shell)에서도 특수 문자들이다. 의심스럽다면, 정규식 패턴을 single quote(')로 감싸서 사용하자: 
 ``` bash
 > fd '^[A-Z][0-9]+$'
 ```
-
-If your pattern starts with a dash, you have to add `--` to signal the end of command line
-options. Otherwise, the pattern will be interpreted as a command-line option. Alternatively,
-use a character class with a single hyphen character:
 
 만약 dash(-)로 시작하는 패턴을 사용한다면, 반드시 command 끝에 `--`을 옵션에 추가해야한다. 그러면 command의 옵션으로 그 패턴이 정상 동작할 것이다. 또 다른 방법으로는 hyphen(-)을 character class로 사용하자: 
 
@@ -479,8 +460,6 @@ use a character class with a single hyphen character:
 ### 다른 프로그램들과 통합하기
 
 #### `fzf`와 함께 fd 사용하기
-
-You can use *fd* to generate input for the command-line fuzzy finder [fzf](https://github.com/junegunn/fzf):
 
 fuzz finder [fzf](https://github.com/junegunn/fzf)의 입력을 *fd*를 이용해 생성할 수 있다:
 ``` bash
@@ -508,9 +487,6 @@ export FZF_DEFAULT_OPTS="--ansi"
 emacs의 패키지인 [find-file-in-project](https://github.com/technomancy/find-file-in-project)도 파일들을 찾기 위해 *fd*를 사용할 수 있다.
 
 `find-file-in-project`을 설치한 후에, `(setq ffip-use-rust-fd t)`을 `~/.emacs` 또는 `~/.emacs.d/init.el` 파일에 추가하자.
-
-In emacs, run `M-x find-file-in-project-by-selected` to find matching files. Alternatively, run
-`M-x find-file-in-project` to list all available files in the project.
 
 emacs에서는 파일들을 찾기 위해, `M-x find-file-in-project-by-selected`을 실행 해보자. 또, 프로젝트의 모든 파일을 보기 위해서는 `M-x find-file-in-project`을 실행 해보자.
 
